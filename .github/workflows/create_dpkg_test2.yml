@@ -1,0 +1,181 @@
+name: Create Debian packages test2
+
+on:
+  workflow_dispatch:
+    inputs:
+      raspbian-bullseye-armhf:
+        type: boolean
+      raspbian-bookworm-armhf:
+        type: boolean
+      raspbian-trixie-armhf:
+        type: boolean
+      raspberrypi-bullseye-arm64:
+        type: boolean
+      raspberrypi-bookworm-arm64:
+        type: boolean
+      raspberrypi-trixie-arm64:
+        type: boolean
+      debian-bullseye-amd64:
+        type: boolean
+      debian-bookworm-amd64:
+        type: boolean
+      debian-trixie-amd64:
+        type: boolean
+      debian-forky-amd64:
+        type: boolean
+
+# Use FLAGS to only build sources for one of the packages. The below could also
+# be imported from files, but that would add a checkout step, plus makes it more
+# important to support multiline json as per:
+# https://github.community/t/set-output-truncates-multiline-strings/16852
+env:
+  raspbian-bullseye-armhf: '{"image":"raspbian-bullseye-armhf","OS":"raspbian","DIST":"bullseye","ARCH":"armhf","FLAGS":"-- --binary-arch"}'
+  raspbian-bookworm-armhf: '{"image":"raspbian-bookworm-armhf","OS":"raspbian","DIST":"bookworm","ARCH":"armhf","FLAGS":"-- --binary-arch"}'
+  raspbian-trixie-armhf: '{"image":"raspbian-trixie-armhf","OS":"raspbian","DIST":"trixie","ARCH":"armhf","FLAGS":"-- --binary-arch"}'
+  raspberrypi-bullseye-arm64: '{"image":"raspberrypi-bullseye-arm64","OS":"raspberrypi","DIST":"bullseye","ARCH":"arm64","FLAGS":"-- --binary-arch"}'
+  raspberrypi-bookworm-arm64: '{"image":"raspberrypi-bookworm-arm64","OS":"raspberrypi","DIST":"bookworm","ARCH":"arm64","FLAGS":"-- --binary-arch"}'
+  raspberrypi-trixie-arm64: '{"image":"raspberrypi-trixie-arm64","OS":"raspberrypi","DIST":"trixie","ARCH":"arm64","FLAGS":"-- --binary-arch"}'
+  debian-bullseye-amd64: '{"image":"debian-bullseye-amd64","OS":"debian","DIST":"bullseye","ARCH":"amd64","FLAGS":"-- --binary-arch"}'
+  debian-bookworm-amd64: '{"image":"debian-bookworm-amd64","OS":"debian","DIST":"bookworm","ARCH":"amd64","FLAGS":"-- --binary-arch"}'
+  debian-trixie-amd64: '{"image":"debian-trixie-amd64","OS":"debian","DIST":"trixie","ARCH":"amd64","FLAGS":"-- --binary-arch"}'
+  debian-forky-amd64: '{"image":"debian-forky-amd64","OS":"debian","DIST":"forky","ARCH":"amd64","FLAGS":"-- --binary-arch"}'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    env:
+      PKGCONF: pkgconf
+      BUILD_raspbian-bullseye-armhf: ${{ github.event.inputs.raspbian-bullseye-armhf || 'true' }}
+      BUILD_raspbian-bookworm-armhf: ${{ github.event.inputs.raspbian-bookworm-armhf || 'true' }}
+      BUILD_raspbian-trixie-armhf: ${{ github.event.inputs.raspbian-trixie-armhf || 'true' }}
+      BUILD_raspberrypi-bullseye-arm64: ${{ github.event.inputs.raspberrypi-bullseye-arm64 || 'true' }}
+      BUILD_raspberrypi-bookworm-arm64: ${{ github.event.inputs.raspberrypi-bookworm-arm64 || 'true' }}
+      BUILD_raspberrypi-trixie-arm64: ${{ github.event.inputs.raspberrypi-trixie-arm64 || 'true' }}
+      BUILD_debian-bullseye-amd64: ${{ github.event.inputs.debian-bullseye-amd64 || 'true' }}
+      BUILD_debian-bookworm-amd64: ${{ github.event.inputs.debian-bookworm-amd64 || 'true' }}
+      BUILD_debian-trixie-amd64: ${{ github.event.inputs.debian-trixie-amd64 || 'true' }}
+      BUILD_debian-forky-amd64: ${{ github.event.inputs.debian-forky-amd64 || 'true' }}
+
+    steps:
+      - name: Add raspbian-bullseye-armhf
+        if: ${{ env.BUILD_raspbian-bullseye-armhf == 'true' }}
+        run: echo -n '${{ env.raspbian-bullseye-armhf }},' >> $PKGCONF
+
+      - name: Add raspbian-bookworm-armhf
+        if: ${{ env.BUILD_raspbian-bookworm-armhf == 'true' }}
+        run: echo -n '${{ env.raspbian-bookworm-armhf }},' >> $PKGCONF
+
+      - name: Add raspbian-trixie-armhf
+        if: ${{ env.BUILD_raspbian-trixie-armhf == 'true' }}
+        run: echo -n '${{ env.raspbian-trixie-armhf }},' >> $PKGCONF
+
+      - name: Add raspberrypi-bullseye-arm64
+        if: ${{ env.BUILD_raspberrypi-bullseye-arm64 == 'true' }}
+        run: echo -n '${{ env.raspberrypi-bullseye-arm64 }},' >> $PKGCONF
+
+      - name: Add raspberrypi-bookworm-arm64
+        if: ${{ env.BUILD_raspberrypi-bookworm-arm64 == 'true' }}
+        run: echo -n '${{ env.raspberrypi-bookworm-arm64 }},' >> $PKGCONF
+
+      - name: Add raspberrypi-trixie-arm64
+        if: ${{ env.BUILD_raspberrypi-trixie-arm64 == 'true' }}
+        run: echo -n '${{ env.raspberrypi-trixie-arm64 }},' >> $PKGCONF
+
+      - name: Add debian-bullseye-amd64
+        if: ${{ env.BUILD_debian-bullseye-amd64 == 'true' }}
+        run: echo -n '${{ env.debian-bullseye-amd64 }},' >> $PKGCONF
+
+      - name: Add debian-bookworm-amd64
+        if: ${{ env.BUILD_debian-bookworm-amd64 == 'true' }}
+        run: echo -n '${{ env.debian-bookworm-amd64 }},' >> $PKGCONF
+
+      - name: Add debian-trixie-amd64
+        if: ${{ env.BUILD_debian-trixie-amd64 == 'true' }}
+        run: echo -n '${{ env.debian-trixie-amd64 }},' >> $PKGCONF
+
+      - name: Add debian-forky-amd64
+        if: ${{ env.BUILD_debian-forky-amd64 == 'true' }}
+        run: echo -n '${{ env.debian-forky-amd64 }},' >> $PKGCONF
+
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          test -f $PKGCONF || { echo "No packages selected"; exit 1; }
+          echo -e "`cat $PKGCONF`\n"
+          echo "matrix={\"include\":[`cat $PKGCONF`]}" >> $GITHUB_OUTPUT
+
+  build:
+    runs-on: ubuntu-latest
+    needs: prepare
+    strategy:
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load package info into environment
+        run: |
+          echo "packages=$(cat pkginfo.json | tr -d '\n')" >> $GITHUB_ENV
+
+      - name: Prepare directories
+        run: |
+          mkdir dl
+          mkdir build_dir
+          mkdir cache
+
+      # dh-make and devscripts are only used for the package build
+      - name: Install pbuilder, Debian tools, keyrings
+        run: |
+          sudo apt-get update
+          sudo apt-get install -yq pbuilder qemu-user-static debian-archive-keyring devscripts dh-make
+          wget -O dl/raspbian-archive-keyring.deb http://archive.raspbian.org/raspbian/pool/main/r/raspbian-archive-keyring/raspbian-archive-keyring_20120528.4_all.deb
+          sudo dpkg -i dl/raspbian-archive-keyring.deb
+          wget -O dl/raspberrypi-archive-keyring.deb http://archive.raspberrypi.org/debian/pool/main/r/raspberrypi-archive-keyring/raspberrypi-archive-keyring_2025.1+rpt1_all.deb
+          sudo dpkg -i dl/raspberrypi-archive-keyring.deb
+
+      - name: Cache pbuilder image
+        id: cache-image
+        uses: actions/cache@v4
+        with:
+          path: cache/${{ matrix.image }}-base.tgz
+          key: ${{ matrix.image }}
+
+      - name: Restore image from cache
+        if: steps.cache-image.outputs.cache-hit == 'true'
+        run: |
+          sudo cp cache/${{ matrix.image }}-base.tgz /var/cache/pbuilder/
+          sudo OS=${{ matrix.OS }} DIST=${{ matrix.DIST }} ARCH=${{ matrix.ARCH }} pbuilder update --configfile pbuilderrc
+      - name: Or create pbuilder image
+        if: steps.cache-image.outputs.cache-hit != 'true'
+        run: |
+          sudo OS=${{ matrix.OS }} DIST=${{ matrix.DIST }} ARCH=${{ matrix.ARCH }} pbuilder create --configfile pbuilderrc
+          cp /var/cache/pbuilder/${{ matrix.image }}-base.tgz cache/
+
+      - name: Download and build packages
+        working-directory: build_dir
+        run: |
+          echo '${{ env.packages }}' | jq -c '.[]' | while read -r pkg; do
+            NAME=$(echo $pkg | jq -r '.name')
+            VERSION=$(echo $pkg | jq -r '.version')
+            OWNER=$(echo $pkg | jq -r '.owner')
+            REPOSITORY=$(echo $pkg | jq -r '.repository')
+            COMMIT=$(echo $pkg | jq -r '.commit')
+            echo "--- Begin build of $NAME version $VERSION for ${{ matrix.ARCH }} ---"
+            wget -O $NAME_$VERSION.orig.tar.gz https://github.com/$OWNER/$REPOSITORY/archive/$COMMIT.tar.gz
+            tar xzf $NAME_$VERSION.orig.tar.gz
+            mv $REPOSITORY-$COMMIT $NAME-$VERSION
+            cp -a ../$REPOSITORY/debian $NAME-$VERSION/.
+            cd $NAME-$VERSION
+            dch --create --package $NAME --newversion $VERSION-$DEB+${{ matrix.DIST }} --distribution ${{ matrix.DIST }} --force-distribution "Dummy changelog @commit $COMMIT"
+            sudo OS=${{ matrix.OS }} DIST=${{ matrix.DIST }} ARCH=${{ matrix.ARCH }} DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck" pdebuild --configfile ../../pbuilderrc ${{ matrix.FLAGS }}
+            rm debian/changelog
+            cd ..
+          done
+
+      - name: Upload dpkg
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.image }}
+          path: /var/cache/pbuilder/result/${{ matrix.image }}

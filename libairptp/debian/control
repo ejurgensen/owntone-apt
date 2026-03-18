@@ -1,0 +1,18 @@
+Source: airptpd
+Section: utils
+Priority: optional
+Maintainer: Espen Jürgensen <espenjurgensen+raspbian@gmail.com>
+Build-Depends: debhelper,
+ autoconf,
+ libtool,
+ gettext,
+ libevent-dev
+Homepage: https://github.com/owntone/libairptp
+Standards-Version: 3.9.8
+
+Package: airptpd
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: libairptp is a library that implements the Precision Time Protocol
+in the way an AirPlay 2 sender like OwnTone needs. It is not an actual PTP
+clock.
