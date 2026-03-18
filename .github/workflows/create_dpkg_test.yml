@@ -106,6 +106,7 @@ jobs:
           echo -e "`cat $BUILDTARGETS`\n"
           echo "matrix={\"include\":[`cat $BUILDTARGETS`]}" >> $GITHUB_OUTPUT
           echo "packages=$(cat pkginfo.json | tr -d '\n')" >> $GITHUB_OUTPUT
+          echo $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
