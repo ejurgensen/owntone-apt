@@ -105,6 +105,7 @@ jobs:
           test -f $BUILDTARGETS || { echo "No build targets selected"; exit 1; }
           echo -e "`cat $BUILDTARGETS`\n"
           echo "matrix={\"include\":[`cat $BUILDTARGETS`]}" >> $GITHUB_OUTPUT
+          echo "packages=$(cat pkginfo.json | tr -d '\n')" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
@@ -115,10 +116,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Load package info into environment
-        run: |
-          echo "packages=$(cat pkginfo.json | tr -d '\n')" >> $GITHUB_ENV
-
       - name: Prepare directories
         run: |
           mkdir dl
@@ -127,7 +124,7 @@ jobs:
 
       - name: Download and build
         run: |
-          echo '${{ needs.setup.outputs.packages }}' | jq -c '.[]' | while read -r pkg; do
+          echo '${{ needs.prepare.outputs.packages }}' | jq -c '.[]' | while read -r pkg; do
             NAME=$(echo $pkg | jq -r '.name')
             echo "--- Begin build of $NAME for ${{ matrix.ARCH }} ---"
           done
