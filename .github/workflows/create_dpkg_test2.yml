@@ -161,7 +161,7 @@ jobs:
             OWNER=$(echo $pkg | jq -r '.owner')
             REPOSITORY=$(echo $pkg | jq -r '.repository')
             COMMIT=$(echo $pkg | jq -r '.commit')
-            NAMEVERSION="{{ NAME }}_{{ VERSION }}"
+            NAMEVERSION="${NAME}_${VERSION}"
             echo "--- Begin build of $NAMEVERSION for ${{ matrix.ARCH }} ---"
             wget -O "build_dir/$NAMEVERSION.orig.tar.gz" "https://github.com/$OWNER/$REPOSITORY/archive/$COMMIT.tar.gz"
             tar xzf "build_dir/$NAMEVERSION.orig.tar.gz" --directory build_dir
