@@ -163,14 +163,6 @@ jobs:
             COMMIT=$(echo $pkg | jq -r '.commit')
             NAMEVERSION="${NAME}_${VERSION}"
             echo "--- Begin build of $NAMEVERSION for ${{ matrix.ARCH }} ---"
-            wget -O "build_dir/$NAMEVERSION.orig.tar.gz" "https://github.com/$OWNER/$REPOSITORY/archive/$COMMIT.tar.gz"
-            tar xzf "build_dir/$NAMEVERSION.orig.tar.gz" --directory build_dir
-            cp -a "$REPOSITORY/debian" "build_dir/$REPOSITORY-$COMMIT"
-            cd "build_dir/$REPOSITORY-$COMMIT"
-            dch --create --package $NAME --newversion $VERSION-$DEB+${{ matrix.DIST }} --distribution ${{ matrix.DIST }} --force-distribution "Dummy changelog @commit $COMMIT"
-            sudo OS=${{ matrix.OS }} DIST=${{ matrix.DIST }} ARCH=${{ matrix.ARCH }} DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck" pdebuild --configfile ../../pbuilderrc ${{ matrix.FLAGS }}
-            rm debian/changelog
-            cd ../..
           done
 
       - name: Upload dpkg
