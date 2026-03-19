@@ -154,7 +154,6 @@ jobs:
           cp /var/cache/pbuilder/${{ matrix.image }}-base.tgz cache/
 
       - name: Download and build packages
-        working-directory: build_dir
         run: |
           echo '${{ env.packages }}' | jq -c '.[]' | while read -r pkg; do
             NAME=$(echo $pkg | jq -r '.name')
@@ -164,14 +163,13 @@ jobs:
             COMMIT=$(echo $pkg | jq -r '.commit')
             echo "--- Begin build of $NAME version $VERSION for ${{ matrix.ARCH }} ---"
             wget -O $NAME_$VERSION.orig.tar.gz https://github.com/$OWNER/$REPOSITORY/archive/$COMMIT.tar.gz
-            tar xzf $NAME_$VERSION.orig.tar.gz
-            mv $REPOSITORY-$COMMIT $NAME-$VERSION
-            cp -a ../$REPOSITORY/debian $NAME-$VERSION/.
-            cd $NAME-$VERSION
+            tar xzf $NAME_$VERSION.orig.tar.gz --directory build_dir
+            cp -a $REPOSITORY/debian build_dir/$REPOSITORY-$COMMIT
+            cd build_dir/$REPOSITORY-$COMMIT
             dch --create --package $NAME --newversion $VERSION-$DEB+${{ matrix.DIST }} --distribution ${{ matrix.DIST }} --force-distribution "Dummy changelog @commit $COMMIT"
             sudo OS=${{ matrix.OS }} DIST=${{ matrix.DIST }} ARCH=${{ matrix.ARCH }} DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck" pdebuild --configfile ../../pbuilderrc ${{ matrix.FLAGS }}
             rm debian/changelog
-            cd ..
+            cd ../..
           done
 
       - name: Upload dpkg
