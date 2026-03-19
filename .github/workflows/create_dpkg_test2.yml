@@ -167,10 +167,6 @@ jobs:
             tar xzf "build_dir/$NAMEVERSION.orig.tar.gz" --directory build_dir
             cp -a "$REPOSITORY/debian" "build_dir/$REPOSITORY-$COMMIT"
             cd "build_dir/$REPOSITORY-$COMMIT"
-            echo "$NAME $NAMEVERSION.orig.tar.gz"
-            pwd
-            ls ..
-            ls ../..
             dch --create --package $NAME --newversion $VERSION-$DEB+${{ matrix.DIST }} --distribution ${{ matrix.DIST }} --force-distribution "Dummy changelog @commit $COMMIT"
             sudo OS=${{ matrix.OS }} DIST=${{ matrix.DIST }} ARCH=${{ matrix.ARCH }} DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck" pdebuild --configfile ../../pbuilderrc ${{ matrix.FLAGS }}
             rm debian/changelog

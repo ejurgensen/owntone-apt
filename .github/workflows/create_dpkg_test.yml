@@ -129,5 +129,7 @@ jobs:
         run: |
           echo '${{ env.packages }}' | jq -c '.[]' | while read -r pkg; do
             NAME=$(echo $pkg | jq -r '.name')
-            echo "--- Begin build of $NAME for ${{ matrix.ARCH }} ---"
+            VERSION=$(echo $pkg | jq -r '.version')
+            NAMEVERSION="${NAME}_${VERSION}"
+            echo "--- Begin build of $NAMEVERSION for ${{ matrix.ARCH }} ---"
           done
