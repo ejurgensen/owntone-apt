@@ -162,8 +162,8 @@ jobs:
             REPOSITORY=$(echo $pkg | jq -r '.repository')
             COMMIT=$(echo $pkg | jq -r '.commit')
             echo "--- Begin build of $NAME version $VERSION for ${{ matrix.ARCH }} ---"
-            wget -O $NAME_$VERSION.orig.tar.gz https://github.com/$OWNER/$REPOSITORY/archive/$COMMIT.tar.gz
-            tar xzf $NAME_$VERSION.orig.tar.gz --directory build_dir
+            wget -O build_dir/$NAME_$VERSION.orig.tar.gz https://github.com/$OWNER/$REPOSITORY/archive/$COMMIT.tar.gz
+            tar xzf build_dir/$NAME_$VERSION.orig.tar.gz --directory build_dir
             cp -a $REPOSITORY/debian build_dir/$REPOSITORY-$COMMIT
             cd build_dir/$REPOSITORY-$COMMIT
             dch --create --package $NAME --newversion $VERSION-$DEB+${{ matrix.DIST }} --distribution ${{ matrix.DIST }} --force-distribution "Dummy changelog @commit $COMMIT"
