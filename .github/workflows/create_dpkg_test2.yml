@@ -161,12 +161,13 @@ jobs:
             OWNER=$(echo $pkg | jq -r '.owner')
             REPOSITORY=$(echo $pkg | jq -r '.repository')
             COMMIT=$(echo $pkg | jq -r '.commit')
-            echo "--- Begin build of $NAME version $VERSION for ${{ matrix.ARCH }} ---"
-            wget -O "build_dir/$NAME\_$VERSION.orig.tar.gz" "https://github.com/$OWNER/$REPOSITORY/archive/$COMMIT.tar.gz"
-            tar xzf "build_dir/$NAME\_$VERSION.orig.tar.gz" --directory build_dir
+            NAMEVERSION="{{ NAME }}_{{ VERSION }}"
+            echo "--- Begin build of $NAMEVERSION for ${{ matrix.ARCH }} ---"
+            wget -O "build_dir/$NAMEVERSION.orig.tar.gz" "https://github.com/$OWNER/$REPOSITORY/archive/$COMMIT.tar.gz"
+            tar xzf "build_dir/$NAMEVERSION.orig.tar.gz" --directory build_dir
             cp -a "$REPOSITORY/debian" "build_dir/$REPOSITORY-$COMMIT"
             cd "build_dir/$REPOSITORY-$COMMIT"
-            echo "$NAME $NAME\_$VERSION.orig.tar.gz"
+            echo "$NAME $NAMEVERSION.orig.tar.gz"
             pwd
             ls ..
             ls ../..
