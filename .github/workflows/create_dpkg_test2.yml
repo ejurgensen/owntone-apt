@@ -167,6 +167,8 @@ jobs:
             tar xzf "build_dir/$NAMEVERSION.orig.tar.gz" --directory build_dir
             cp -a "$REPOSITORY/debian" "build_dir/$REPOSITORY-$COMMIT"
             cd "build_dir/$REPOSITORY-$COMMIT"
+            dch --create --package $NAME --newversion $VERSION-$DEB+${{ matrix.DIST }} --distribution ${{ matrix.DIST }} --force-distribution "Dummy changelog @commit $COMMIT"
+            rm debian/changelog
             cd ../..
           done
 
