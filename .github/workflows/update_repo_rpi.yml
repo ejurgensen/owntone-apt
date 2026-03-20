@@ -16,31 +16,12 @@ jobs:
   update_repo:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Prepare tmp directories
         run: |
           mkdir dl
           mkdir dist
-
-      - name: Install reprepro
-        run: |
-          sudo apt-get update
-          sudo apt-get install -yq reprepro
-
-      - name: Import key
-        env:
-          RPI_REPO_SECKEY: ${{ secrets.RPI_REPO_SECKEY }}
-        run: |
-          echo -n "$RPI_REPO_SECKEY" | gpg --import
-
-      - name: Download and unpack latest repo
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release download --dir dl --pattern $RELFILE
-          tar xzf dl/$RELFILE --directory repo/rpi/var
-          ls -lR repo/rpi/var
 
       - name: Download packages
         uses: dawidd6/action-download-artifact@v2
@@ -56,33 +37,3 @@ jobs:
           DPKGDIR: ../../dl
         run: |
           ls -l ../../dl
-          test ! -d $DPKGDIR/raspbian-buster-armhf || mv $DPKGDIR/raspbian-buster-armhf/* var/incoming/
-          test ! -d $DPKGDIR/raspbian-bullseye-armhf || mv $DPKGDIR/raspbian-bullseye-armhf/* var/incoming/
-          test ! -d $DPKGDIR/raspbian-bookworm-armhf || mv $DPKGDIR/raspbian-bookworm-armhf/* var/incoming/
-          test ! -d $DPKGDIR/raspbian-trixie-armhf || mv $DPKGDIR/raspbian-trixie-armhf/* var/incoming/
-          test ! -d $DPKGDIR/raspberrypi-bullseye-arm64 || mv $DPKGDIR/raspberrypi-bullseye-arm64/* var/incoming/
-          test ! -d $DPKGDIR/raspberrypi-bookworm-arm64 || mv $DPKGDIR/raspberrypi-bookworm-arm64/* var/incoming/
-          test ! -d $DPKGDIR/raspberrypi-trixie-arm64 || mv $DPKGDIR/raspberrypi-trixie-arm64/* var/incoming/
-          reprepro processincoming default
-
-      - name: Pack and prepare release
-        run: |
-          tar czf dist/$RELFILE --directory repo/rpi/var/ db publish
-          ls -lR dist
-
-      - name: Create release notes
-        working-directory: repo/rpi
-        run: |
-          echo -e "Distro | Section | Package\n------ | ------- | -------" > ../../$RELNOTESFILE
-          reprepro list buster >> ../../$RELNOTESFILE
-          reprepro list bullseye >> ../../$RELNOTESFILE
-          reprepro list bookworm >> ../../$RELNOTESFILE
-          reprepro list trixie >> ../../$RELNOTESFILE
-          cat ../../$RELNOTESFILE
-
-      - name: Create release
-        if: ${{ github.event.inputs.release == 'true' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create "rpi_rev$GITHUB_RUN_NUMBER" --title "RPi repo revision $GITHUB_RUN_NUMBER" --notes-file $RELNOTESFILE dist/$RELFILE
