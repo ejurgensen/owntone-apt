@@ -1,138 +1,38 @@
 name: Matrix test
-
 on:
+  push:
   workflow_dispatch:
-    inputs:
-      raspbian-bullseye-armhf:
-        type: boolean
-      raspbian-bookworm-armhf:
-        type: boolean
-      raspbian-trixie-armhf:
-        type: boolean
-      raspberrypi-bullseye-arm64:
-        type: boolean
-      raspberrypi-bookworm-arm64:
-        type: boolean
-      raspberrypi-trixie-arm64:
-        type: boolean
-      debian-bullseye-amd64:
-        type: boolean
-      debian-bookworm-amd64:
-        type: boolean
-      debian-trixie-amd64:
-        type: boolean
-      debian-forky-amd64:
-        type: boolean
-
-# Use FLAGS to only build sources for one of the packages. The below could also
-# be imported from files, but that would add a checkout step, plus makes it more
-# important to support multiline json as per:
-# https://github.community/t/set-output-truncates-multiline-strings/16852
-env:
-  raspbian-bullseye-armhf: '{"image":"raspbian-bullseye-armhf","OS":"raspbian","DIST":"bullseye","ARCH":"armhf","FLAGS":"-- --binary-arch"}'
-  raspbian-bookworm-armhf: '{"image":"raspbian-bookworm-armhf","OS":"raspbian","DIST":"bookworm","ARCH":"armhf","FLAGS":"-- --binary-arch"}'
-  raspbian-trixie-armhf: '{"image":"raspbian-trixie-armhf","OS":"raspbian","DIST":"trixie","ARCH":"armhf","FLAGS":"-- --binary-arch"}'
-  raspberrypi-bullseye-arm64: '{"image":"raspberrypi-bullseye-arm64","OS":"raspberrypi","DIST":"bullseye","ARCH":"arm64","FLAGS":"-- --binary-arch"}'
-  raspberrypi-bookworm-arm64: '{"image":"raspberrypi-bookworm-arm64","OS":"raspberrypi","DIST":"bookworm","ARCH":"arm64","FLAGS":"-- --binary-arch"}'
-  raspberrypi-trixie-arm64: '{"image":"raspberrypi-trixie-arm64","OS":"raspberrypi","DIST":"trixie","ARCH":"arm64","FLAGS":"-- --binary-arch"}'
-  debian-bullseye-amd64: '{"image":"debian-bullseye-amd64","OS":"debian","DIST":"bullseye","ARCH":"amd64","FLAGS":"-- --binary-arch"}'
-  debian-bookworm-amd64: '{"image":"debian-bookworm-amd64","OS":"debian","DIST":"bookworm","ARCH":"amd64","FLAGS":"-- --binary-arch"}'
-  debian-trixie-amd64: '{"image":"debian-trixie-amd64","OS":"debian","DIST":"trixie","ARCH":"amd64","FLAGS":"-- --binary-arch"}'
-  debian-forky-amd64: '{"image":"debian-forky-amd64","OS":"debian","DIST":"forky","ARCH":"amd64","FLAGS":"-- --binary-arch"}'
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
+
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    env:
-      BUILDTARGETS: buildtargets.json
-      BUILD_raspbian-bullseye-armhf: ${{ github.event.inputs.raspbian-bullseye-armhf || 'true' }}
-      BUILD_raspbian-bookworm-armhf: ${{ github.event.inputs.raspbian-bookworm-armhf || 'true' }}
-      BUILD_raspbian-trixie-armhf: ${{ github.event.inputs.raspbian-trixie-armhf || 'true' }}
-      BUILD_raspberrypi-bullseye-arm64: ${{ github.event.inputs.raspberrypi-bullseye-arm64 || 'true' }}
-      BUILD_raspberrypi-bookworm-arm64: ${{ github.event.inputs.raspberrypi-bookworm-arm64 || 'true' }}
-      BUILD_raspberrypi-trixie-arm64: ${{ github.event.inputs.raspberrypi-trixie-arm64 || 'true' }}
-      BUILD_debian-bullseye-amd64: ${{ github.event.inputs.debian-bullseye-amd64 || 'true' }}
-      BUILD_debian-bookworm-amd64: ${{ github.event.inputs.debian-bookworm-amd64 || 'true' }}
-      BUILD_debian-trixie-amd64: ${{ github.event.inputs.debian-trixie-amd64 || 'true' }}
-      BUILD_debian-forky-amd64: ${{ github.event.inputs.debian-forky-amd64 || 'true' }}
+      targets: ${{ steps.set-targets.outputs.targets }}
+      packages: ${{ steps.set-packages.outputs.packages }}
 
     steps:
-      - name: Add raspbian-bullseye-armhf
-        if: ${{ env.BUILD_raspbian-bullseye-armhf == 'true' }}
-        run: echo -n '${{ env.raspbian-bullseye-armhf }},' >> $BUILDTARGETS
-
-      - name: Add raspbian-bookworm-armhf
-        if: ${{ env.BUILD_raspbian-bookworm-armhf == 'true' }}
-        run: echo -n '${{ env.raspbian-bookworm-armhf }},' >> $BUILDTARGETS
-
-      - name: Add raspbian-trixie-armhf
-        if: ${{ env.BUILD_raspbian-trixie-armhf == 'true' }}
-        run: echo -n '${{ env.raspbian-trixie-armhf }},' >> $BUILDTARGETS
-
-      - name: Add raspberrypi-bullseye-arm64
-        if: ${{ env.BUILD_raspberrypi-bullseye-arm64 == 'true' }}
-        run: echo -n '${{ env.raspberrypi-bullseye-arm64 }},' >> $BUILDTARGETS
-
-      - name: Add raspberrypi-bookworm-arm64
-        if: ${{ env.BUILD_raspberrypi-bookworm-arm64 == 'true' }}
-        run: echo -n '${{ env.raspberrypi-bookworm-arm64 }},' >> $BUILDTARGETS
-
-      - name: Add raspberrypi-trixie-arm64
-        if: ${{ env.BUILD_raspberrypi-trixie-arm64 == 'true' }}
-        run: echo -n '${{ env.raspberrypi-trixie-arm64 }},' >> $BUILDTARGETS
-
-      - name: Add debian-bullseye-amd64
-        if: ${{ env.BUILD_debian-bullseye-amd64 == 'true' }}
-        run: echo -n '${{ env.debian-bullseye-amd64 }},' >> $BUILDTARGETS
-
-      - name: Add debian-bookworm-amd64
-        if: ${{ env.BUILD_debian-bookworm-amd64 == 'true' }}
-        run: echo -n '${{ env.debian-bookworm-amd64 }},' >> $BUILDTARGETS
-
-      - name: Add debian-trixie-amd64
-        if: ${{ env.BUILD_debian-trixie-amd64 == 'true' }}
-        run: echo -n '${{ env.debian-trixie-amd64 }},' >> $BUILDTARGETS
-
-      - name: Add debian-forky-amd64
-        if: ${{ env.BUILD_debian-forky-amd64 == 'true' }}
-        run: echo -n '${{ env.debian-forky-amd64 }},' >> $BUILDTARGETS
-
-      - name: Set target matrix
-        id: set-matrix
+      - name: Define targets
+        id: set-targets
         run: |
-          test -f $BUILDTARGETS || { echo "No build targets selected"; exit 1; }
-          echo -e "matrix={\"include\":[`cat $BUILDTARGETS`]}\n"
-          echo "matrix={\"include\":[`cat $BUILDTARGETS`]}" >> $GITHUB_OUTPUT
+          echo 'targets=["big", "medium", "small"]' >> "$GITHUB_OUTPUT"
+
+    steps:
+      - name: Define packages
+        id: set-packages
+        run: |
+          echo 'packages=["red", "green", "blue"]' >> "$GITHUB_OUTPUT"
 
   setup:
-    name: Setup for ${{ matrix.image }}
     runs-on: ubuntu-latest
     needs: prepare
     strategy:
-      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix:
+        targets: ${{ fromJSON(needs.prepare.outputs.targets) }}
 
     steps:
-      - name: Processing ${{ matrix.image }}
+      - name: Make pbuilder
+        env:
+          target: ${{ matrix.targets }}
         run: |
-          echo "${{ matrix.image }}"
-
-      - name: Set target matrix
-        id: set-matrix
-        run: |
-          echo "matrix={\"include\":$(cat pkginfo.json | tr -d '\n')}" >> "$GITHUB_OUTPUT"
-
-  build:
-    name: Build ${{ matrix.name }} for ${{ matrix.version }}
-    runs-on: ubuntu-latest
-    needs: [prepare, setup]
-    strategy:
-      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
-
-    steps:
-      - name: Building for ${{ matrix.image }}
-        run: |
-          echo "${{ matrix.name }} for ${{ matrix.version }}"
+          echo "$target"
