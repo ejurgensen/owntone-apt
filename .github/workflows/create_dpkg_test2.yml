@@ -170,14 +170,6 @@ jobs:
         targets: ${{ fromJSON(needs.prepare.outputs.targets) }}
         packages: ${{ fromJSON(needs.prepare.outputs.packages) }}
 
-    env:
-      image: ${{ matrix.targets.image }}
-      pkgname: ${{ matrix.packages.name }}
-      version: ${{ matrix.packages.version }}
-      owner: ${{ matrix.packages.owner }}
-      repository: ${{ matrix.packages.repository }}
-      commit: ${{ matrix.packages.commit }}
-
     steps:
       - uses: actions/checkout@v6
 
@@ -197,15 +189,21 @@ jobs:
         id: cache-image
         uses: actions/cache@v5
         with:
-          path: cache/${image}-base.tgz
-          key: ${image}
+          path: cache/${{ matrix.targets.image }}-base.tgz
+          key: ${{ matrix.targets.image }}
           fail-on-cache-miss: true
 
       - name: Copy pbuilder image to work dir
         run: |
-          sudo cp cache/${image}-base.tgz /var/cache/pbuilder/
+          sudo cp cache/${{ matrix.targets.image }}-base.tgz /var/cache/pbuilder/
 
       - name: Download source
+        env:
+          name: ${{ matrix.packages.name }}
+          version: ${{ matrix.packages.version }}
+          owner: ${{ matrix.packages.owner }}
+          repository: ${{ matrix.packages.repository }}
+          commit: ${{ matrix.packages.commit }}
         run: |
           echo "build_dir/${name}_${version}, owner ${owner}, repo ${repository}, commit ${commit}"
           wget -O build_dir/${name}_${version}.orig.tar.gz https://github.com/${owner}/${repository}/archive/${commit}.tar.gz
@@ -217,7 +215,8 @@ jobs:
       # creating different packages for different distributions that can be
       # served from one repo.
       - name: Build package
-        working-directory: build_dir/${repository}-${commit}
+        working-directory: build_dir/${{ matrix.packages.repository }}-${{ matrix.packages.commit }}
         run: |
           pwd
+          rm debian/changelog
 
