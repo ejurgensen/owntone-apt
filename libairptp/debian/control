@@ -14,5 +14,5 @@ Package: airptpd
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: libairptp is a library that implements the Precision Time Protocol
-in the way an AirPlay 2 sender like OwnTone needs. It is not an actual PTP
-clock.
+ in the way an AirPlay 2 sender like OwnTone needs. It is not an actual PTP
+ clock.
