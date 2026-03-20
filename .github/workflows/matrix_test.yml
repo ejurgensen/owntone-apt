@@ -134,13 +134,13 @@ jobs:
     needs: [prepare, setup]
     strategy:
       matrix:
-        targets: ${{ fromJSON(needs.prepare.outputs.targets.image) }}
+        targets: ${{ fromJSON(needs.prepare.outputs.targets) }}
         packages: ${{ fromJSON(needs.prepare.outputs.packages) }}
 
     steps:
       - name: Make package
         env:
-          target: ${{ matrix.targets }}
+          target: ${{ matrix.targets.image }}
           package: ${{ matrix.packages.name }}
           version: ${{ matrix.packages.version }}
         run: |
