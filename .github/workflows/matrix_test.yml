@@ -1,4 +1,4 @@
-name: Create Debian packages test
+name: Matrix test
 
 on:
   workflow_dispatch:
