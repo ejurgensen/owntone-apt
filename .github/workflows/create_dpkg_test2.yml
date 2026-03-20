@@ -114,6 +114,11 @@ jobs:
       matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
 
     steps:
+      - name: Prepare directories
+        run: |
+          mkdir dl
+          mkdir cache
+
       - name: Install pbuilder, Debian tools, keyrings
         run: |
           sudo apt-get update
