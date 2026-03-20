@@ -167,6 +167,12 @@ jobs:
           mkdir cache
           mkdir build_dir
 
+      # dh-make and devscripts are only used for the package build
+      - name: Install pbuilder, Debian tools, keyrings
+        run: |
+          sudo apt-get update
+          sudo apt-get install -yq pbuilder qemu-user-static debian-archive-keyring devscripts dh-make
+
       - name: Restore pbuilder image
         id: cache-image
         uses: actions/cache@v4
@@ -177,8 +183,3 @@ jobs:
       - name: Copy pbuilder image to work dir
         run: |
           sudo cp cache/${{ matrix.image }}-base.tgz /var/cache/pbuilder/
-
-      - name: Install Debian packaging tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -yq devscripts dh-make
