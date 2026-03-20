@@ -39,4 +39,5 @@ jobs:
         env:
           DPKGDIR: ../../dl
         run: |
-          ls -l ../../dl
+          find $DPKGDIR -type f -print0 | xargs -0 cp -t var/incoming
+          ls -l var/incoming
