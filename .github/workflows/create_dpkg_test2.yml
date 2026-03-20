@@ -114,6 +114,8 @@ jobs:
       matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
 
     steps:
+      - uses: actions/checkout@v6
+
       - name: Prepare directories
         run: |
           mkdir dl
