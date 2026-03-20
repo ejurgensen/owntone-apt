@@ -44,7 +44,7 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.set-matrix.outputs.targetx }}
     env:
       BUILDTARGETS: buildtargets.json
       BUILD_raspbian-bullseye-armhf: ${{ github.event.inputs.raspbian-bullseye-armhf || 'true' }}
@@ -104,17 +104,17 @@ jobs:
         run: |
           test -f $BUILDTARGETS || { echo "No build targets selected"; exit 1; }
           echo -e "`cat $BUILDTARGETS`\n"
-          echo "matrix={\"include\":[`cat $BUILDTARGETS`]}" >> $GITHUB_OUTPUT
+          echo "targetx={\"include\":[`cat $BUILDTARGETS`]}" >> $GITHUB_OUTPUT
 
   build:
-    name: Setup for ${{ matrix.image }}
+    name: Setup for ${{ targetx.image }}
     runs-on: ubuntu-latest
     needs: prepare
     strategy:
-      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.prepare.outputs.targetx) }}
 
     steps:
-      - name: Add ${{ matrix.image }}
+      - name: Add ${{ targetx.image }}
         run: |
-          echo ${{ matrix.image }}
+          echo ${{ targetx.image }}
 
