@@ -45,7 +45,7 @@ jobs:
       - name: Download packages
         uses: dawidd6/action-download-artifact@v2
         with:
-          workflow: create_dpkg.yml
+          workflow: create_dpkg_test2.yml
           workflow_conclusion: success
           path: dl
 
@@ -55,6 +55,7 @@ jobs:
         env:
           DPKGDIR: ../../dl
         run: |
+          ls -l ../../dl
           test ! -d $DPKGDIR/raspbian-buster-armhf || mv $DPKGDIR/raspbian-buster-armhf/* var/incoming/
           test ! -d $DPKGDIR/raspbian-bullseye-armhf || mv $DPKGDIR/raspbian-bullseye-armhf/* var/incoming/
           test ! -d $DPKGDIR/raspbian-bookworm-armhf || mv $DPKGDIR/raspbian-bookworm-armhf/* var/incoming/
