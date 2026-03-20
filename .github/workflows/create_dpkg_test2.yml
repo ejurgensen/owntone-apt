@@ -137,13 +137,48 @@ jobs:
           path: cache/${{ matrix.image }}-base.tgz
           key: ${{ matrix.image }}
 
-      - name: Restore image from cache
+      - name: Create pbuilder image
+        if: steps.cache-image.outputs.cache-hit != 'true'
+        run: |
+          sudo OS=${{ matrix.OS }} DIST=${{ matrix.DIST }} ARCH=${{ matrix.ARCH }} pbuilder create --configfile pbuilderrc
+      - name: Or update image from cache
         if: steps.cache-image.outputs.cache-hit == 'true'
         run: |
           sudo cp cache/${{ matrix.image }}-base.tgz /var/cache/pbuilder/
           sudo OS=${{ matrix.OS }} DIST=${{ matrix.DIST }} ARCH=${{ matrix.ARCH }} pbuilder update --configfile pbuilderrc
-      - name: Or create pbuilder image
-        if: steps.cache-image.outputs.cache-hit != 'true'
+
+      - name: Copy pbuilder image to cache dir
         run: |
-          sudo OS=${{ matrix.OS }} DIST=${{ matrix.DIST }} ARCH=${{ matrix.ARCH }} pbuilder create --configfile pbuilderrc
           cp /var/cache/pbuilder/${{ matrix.image }}-base.tgz cache/
+
+  build:
+    name: Build packages for ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    needs: [prepare, setup-pbuilder]
+    strategy:
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Prepare directories
+        run: |
+          mkdir dl
+          mkdir cache
+          mkdir build_dir
+
+      - name: Restore pbuilder image
+        id: cache-image
+        uses: actions/cache@v4
+        with:
+          path: cache/${{ matrix.image }}-base.tgz
+          key: ${{ matrix.image }}
+
+      - name: Copy pbuilder image to work dir
+        run: |
+          sudo cp cache/${{ matrix.image }}-base.tgz /var/cache/pbuilder/
+
+      - name: Install Debian packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -yq devscripts dh-make
