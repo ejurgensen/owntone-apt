@@ -105,6 +105,7 @@ jobs:
           test -f $BUILDTARGETS || { echo "No build targets selected"; exit 1; }
           echo -e "`cat $BUILDTARGETS`\n"
           echo "matrix={\"include\":[`cat $BUILDTARGETS`]}" >> $GITHUB_OUTPUT
+	  echo $GITHUB_OUTPUT
 
   setup:
     name: Setup for ${{ matrix.image }}
