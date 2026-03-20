@@ -199,10 +199,24 @@ jobs:
 
       - name: Download source
         env:
-          package: ${{ matrix.packages.name }}
+          name: ${{ matrix.packages.name }}
           version: ${{ matrix.packages.version }}
           owner: ${{ matrix.packages.owner }}
           repository: ${{ matrix.packages.repository }}
           commit: ${{ matrix.packages.commit }}
         run: |
-          echo "build_dir/${package}_${version}, owner ${owner}, repo ${repository}, commit ${commit}"
+          echo "build_dir/${name}_${version}, owner ${owner}, repo ${repository}, commit ${commit}"
+          wget -O build_dir/${name}_${version}.orig.tar.gz https://github.com/${owner}/${repository}/archive/${commit}.tar.gz
+          tar xzf build_dir/${name}_${version}.orig.tar.gz --directory build_dir
+          cp -a ${repository}/debian build_dir/${repository}-${commit}
+
+      # The below uses a method of creating changelog and setting versions that
+      # isn't very kosher. I don't know how to use the proper method while still
+      # creating different packages for different distributions that can be
+      # served from one repo.
+      - name: Build package
+        working-directory: build_dir/${{ matrix.packages.repository }}-${{ matrix.packages.commit }}
+        run: |
+          pwd
+          rm debian/changelog
+
