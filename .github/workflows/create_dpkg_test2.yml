@@ -199,15 +199,15 @@ jobs:
 
       - name: Download source
         env:
-          name: ${{ matrix.packages.name }}
+          pkgname: ${{ matrix.packages.name }}
           version: ${{ matrix.packages.version }}
           owner: ${{ matrix.packages.owner }}
           repository: ${{ matrix.packages.repository }}
           commit: ${{ matrix.packages.commit }}
         run: |
-          echo "build_dir/${name}_${version}, owner ${owner}, repo ${repository}, commit ${commit}"
-          wget -O build_dir/${name}_${version}.orig.tar.gz https://github.com/${owner}/${repository}/archive/${commit}.tar.gz
-          tar xzf build_dir/${name}_${version}.orig.tar.gz --directory build_dir
+          echo "Downloading from https://github.com/${owner}/${repository}/archive/${commit}.tar.gz to build_dir/${pkgname}_${version}.orig.tar.gz"
+          wget -O build_dir/${pkgname}_${version}.orig.tar.gz https://github.com/${owner}/${repository}/archive/${commit}.tar.gz
+          tar xzf build_dir/${pkgname}_${version}.orig.tar.gz --directory build_dir
           cp -a ${repository}/debian build_dir/${repository}-${commit}
 
       # The below uses a method of creating changelog and setting versions that
@@ -216,7 +216,17 @@ jobs:
       # served from one repo.
       - name: Build package
         working-directory: build_dir/${{ matrix.packages.repository }}-${{ matrix.packages.commit }}
+        env:
+          pkgname: ${{ matrix.packages.name }}
+          version: ${{ matrix.packages.version }}
+          deb: ${{ matrix.packages.deb }}
+          commit: ${{ matrix.packages.commit }}
+          dist: ${{ matrix.targets.DIST }}
+          os: ${{ matrix.targets.OS }}
+          arch: ${{ matrix.targets.ARCH }}
+          flags: ${{ matrix.targets.FLAGS }}
         run: |
-          pwd
+          dch --create --package ${pkgname} --newversion ${version}-${deb}+${dist} --distribution ${dist} --force-distribution "Dummy changelog @commit ${commit}"
+          sudo OS=${os} DIST=${dist} ARCH=${arch} DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck" pdebuild --configfile ../../pbuilderrc ${flags}
           rm debian/changelog
 
