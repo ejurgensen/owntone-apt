@@ -29,6 +29,9 @@ jobs:
           workflow: create_dpkg_test2.yml
           workflow_conclusion: success
           path: dl
+          name: "/raspbian|raspberrypi/"
+          name_is_regexp: true
+          merge_multiple: true
 
       # Moves from e.g. dl/raspberrypi-bullseye-arm64 to repo/rpi/incoming
       - name: Add incoming packages
