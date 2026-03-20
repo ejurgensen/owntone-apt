@@ -112,9 +112,27 @@ jobs:
     needs: prepare
     strategy:
       matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     steps:
       - name: Processing ${{ matrix.image }}
         run: |
-          echo ${{ matrix.image }}
+          echo "${{ matrix.image }}"
 
+      - name: Set target matrix
+        id: set-matrix
+        run: |
+          echo "matrix={\"include\":[{\"package\":"\pkgA\",\"image\":\"imgA\"}]}" >> $GITHUB_OUTPUT
+
+  build:
+    name: Build ${{ matrix.package }} for ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    needs: [prepare, setup]
+    strategy:
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
+
+    steps:
+      - name: Building for ${{ matrix.image }}
+        run: |
+          echo "${{ matrix.package }} for ${{ matrix.image }}"
