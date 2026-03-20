@@ -35,3 +35,19 @@ jobs:
           target: ${{ matrix.targets }}
         run: |
           echo "$target"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [prepare, setup]
+    strategy:
+      matrix:
+        targets: ${{ fromJSON(needs.prepare.outputs.targets) }}
+        packages: ${{ fromJSON(needs.prepare.outputs.packages) }}
+
+    steps:
+      - name: Make package
+        env:
+          target: ${{ matrix.targets }}
+          package: ${{ matrix.packages }}
+        run: |
+          echo "Making $package for $target"
