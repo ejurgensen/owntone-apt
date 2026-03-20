@@ -42,6 +42,7 @@ env:
 
 jobs:
   prepare:
+    name: Plan jobs
     runs-on: ubuntu-latest
     outputs:
       targets: ${{ steps.set-targets.outputs.targets }}
@@ -161,7 +162,7 @@ jobs:
           cp /var/cache/pbuilder/${{ matrix.targets.image }}-base.tgz cache/
 
   build:
-    name: Build packages for ${{ matrix.targets.image }}
+    name: Build ${{ matrix.packages.name }} (${{ matrix.targets.image }})
     runs-on: ubuntu-latest
     needs: [prepare, setup]
     strategy:
@@ -195,3 +196,13 @@ jobs:
       - name: Copy pbuilder image to work dir
         run: |
           sudo cp cache/${{ matrix.targets.image }}-base.tgz /var/cache/pbuilder/
+
+      - name: Download source
+        env:
+          package: ${{ matrix.packages.name }}
+          version: ${{ matrix.packages.version }}
+          owner: ${{ matrix.packages.owner }}
+          repository: ${{ matrix.packages.repository }}
+          commit: ${{ matrix.packages.commit }}
+        run: |
+          echo "build_dir/${package}_${version}, owner ${owner}, repo ${repository}, commit ${commit}"
