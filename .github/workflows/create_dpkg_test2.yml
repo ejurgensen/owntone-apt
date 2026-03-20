@@ -46,7 +46,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     env:
-      PKGCONF: pkgconf
+      BUILDTARGETS: buildtargets.json
       BUILD_raspbian-bullseye-armhf: ${{ github.event.inputs.raspbian-bullseye-armhf || 'true' }}
       BUILD_raspbian-bookworm-armhf: ${{ github.event.inputs.raspbian-bookworm-armhf || 'true' }}
       BUILD_raspbian-trixie-armhf: ${{ github.event.inputs.raspbian-trixie-armhf || 'true' }}
@@ -61,75 +61,63 @@ jobs:
     steps:
       - name: Add raspbian-bullseye-armhf
         if: ${{ env.BUILD_raspbian-bullseye-armhf == 'true' }}
-        run: echo -n '${{ env.raspbian-bullseye-armhf }},' >> $PKGCONF
+        run: echo -n '${{ env.raspbian-bullseye-armhf }},' >> $BUILDTARGETS
 
       - name: Add raspbian-bookworm-armhf
         if: ${{ env.BUILD_raspbian-bookworm-armhf == 'true' }}
-        run: echo -n '${{ env.raspbian-bookworm-armhf }},' >> $PKGCONF
+        run: echo -n '${{ env.raspbian-bookworm-armhf }},' >> $BUILDTARGETS
 
       - name: Add raspbian-trixie-armhf
         if: ${{ env.BUILD_raspbian-trixie-armhf == 'true' }}
-        run: echo -n '${{ env.raspbian-trixie-armhf }},' >> $PKGCONF
+        run: echo -n '${{ env.raspbian-trixie-armhf }},' >> $BUILDTARGETS
 
       - name: Add raspberrypi-bullseye-arm64
         if: ${{ env.BUILD_raspberrypi-bullseye-arm64 == 'true' }}
-        run: echo -n '${{ env.raspberrypi-bullseye-arm64 }},' >> $PKGCONF
+        run: echo -n '${{ env.raspberrypi-bullseye-arm64 }},' >> $BUILDTARGETS
 
       - name: Add raspberrypi-bookworm-arm64
         if: ${{ env.BUILD_raspberrypi-bookworm-arm64 == 'true' }}
-        run: echo -n '${{ env.raspberrypi-bookworm-arm64 }},' >> $PKGCONF
+        run: echo -n '${{ env.raspberrypi-bookworm-arm64 }},' >> $BUILDTARGETS
 
       - name: Add raspberrypi-trixie-arm64
         if: ${{ env.BUILD_raspberrypi-trixie-arm64 == 'true' }}
-        run: echo -n '${{ env.raspberrypi-trixie-arm64 }},' >> $PKGCONF
+        run: echo -n '${{ env.raspberrypi-trixie-arm64 }},' >> $BUILDTARGETS
 
       - name: Add debian-bullseye-amd64
         if: ${{ env.BUILD_debian-bullseye-amd64 == 'true' }}
-        run: echo -n '${{ env.debian-bullseye-amd64 }},' >> $PKGCONF
+        run: echo -n '${{ env.debian-bullseye-amd64 }},' >> $BUILDTARGETS
 
       - name: Add debian-bookworm-amd64
         if: ${{ env.BUILD_debian-bookworm-amd64 == 'true' }}
-        run: echo -n '${{ env.debian-bookworm-amd64 }},' >> $PKGCONF
+        run: echo -n '${{ env.debian-bookworm-amd64 }},' >> $BUILDTARGETS
 
       - name: Add debian-trixie-amd64
         if: ${{ env.BUILD_debian-trixie-amd64 == 'true' }}
-        run: echo -n '${{ env.debian-trixie-amd64 }},' >> $PKGCONF
+        run: echo -n '${{ env.debian-trixie-amd64 }},' >> $BUILDTARGETS
 
       - name: Add debian-forky-amd64
         if: ${{ env.BUILD_debian-forky-amd64 == 'true' }}
-        run: echo -n '${{ env.debian-forky-amd64 }},' >> $PKGCONF
+        run: echo -n '${{ env.debian-forky-amd64 }},' >> $BUILDTARGETS
 
       - name: Set matrix
         id: set-matrix
         run: |
-          test -f $PKGCONF || { echo "No packages selected"; exit 1; }
-          echo -e "`cat $PKGCONF`\n"
-          echo "matrix={\"include\":[`cat $PKGCONF`]}" >> $GITHUB_OUTPUT
+          test -f $BUILDTARGETS || { echo "No build targets selected"; exit 1; }
+          echo -e "`cat $BUILDTARGETS`\n"
+          echo "matrix={\"include\":[`cat $BUILDTARGETS`]}" >> $GITHUB_OUTPUT
 
-  build:
+  setup-pbuilder:
+    name: Setup pbuilder for ${{ matrix.image }}
     runs-on: ubuntu-latest
     needs: prepare
     strategy:
       matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Load package info into environment
-        run: |
-          echo "packages=$(cat pkginfo.json | tr -d '\n')" >> $GITHUB_ENV
-
-      - name: Prepare directories
-        run: |
-          mkdir dl
-          mkdir build_dir
-          mkdir cache
-
-      # dh-make and devscripts are only used for the package build
       - name: Install pbuilder, Debian tools, keyrings
         run: |
           sudo apt-get update
-          sudo apt-get install -yq pbuilder qemu-user-static debian-archive-keyring devscripts dh-make
+          sudo apt-get install -yq pbuilder qemu-user-static debian-archive-keyring
           wget -O dl/raspbian-archive-keyring.deb http://archive.raspbian.org/raspbian/pool/main/r/raspbian-archive-keyring/raspbian-archive-keyring_20120528.4_all.deb
           sudo dpkg -i dl/raspbian-archive-keyring.deb
           wget -O dl/raspberrypi-archive-keyring.deb http://archive.raspberrypi.org/debian/pool/main/r/raspberrypi-archive-keyring/raspberrypi-archive-keyring_2025.1+rpt1_all.deb
@@ -152,28 +140,3 @@ jobs:
         run: |
           sudo OS=${{ matrix.OS }} DIST=${{ matrix.DIST }} ARCH=${{ matrix.ARCH }} pbuilder create --configfile pbuilderrc
           cp /var/cache/pbuilder/${{ matrix.image }}-base.tgz cache/
-
-      - name: Download and build packages
-        run: |
-          echo '${{ env.packages }}' | jq -c '.[]' | while read -r pkg; do
-            NAME=$(echo $pkg | jq -r '.name')
-            VERSION=$(echo $pkg | jq -r '.version')
-            OWNER=$(echo $pkg | jq -r '.owner')
-            REPOSITORY=$(echo $pkg | jq -r '.repository')
-            COMMIT=$(echo $pkg | jq -r '.commit')
-            NAMEVERSION="${NAME}_${VERSION}"
-            echo "--- Begin build of $NAMEVERSION for ${{ matrix.ARCH }} ---"
-            wget -O "build_dir/$NAMEVERSION.orig.tar.gz" "https://github.com/$OWNER/$REPOSITORY/archive/$COMMIT.tar.gz"
-            tar xzf "build_dir/$NAMEVERSION.orig.tar.gz" --directory build_dir
-            cp -a "$REPOSITORY/debian" "build_dir/$REPOSITORY-$COMMIT"
-            cd "build_dir/$REPOSITORY-$COMMIT"
-            dch --create --package $NAME --newversion $VERSION-$DEB+${{ matrix.DIST }} --distribution ${{ matrix.DIST }} --force-distribution "Dummy changelog @commit $COMMIT"
-            rm debian/changelog
-            cd ../..
-          done
-
-      - name: Upload dpkg
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.image }}
-          path: /var/cache/pbuilder/result/${{ matrix.image }}
