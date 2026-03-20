@@ -12,6 +12,8 @@ jobs:
       packages: ${{ steps.set-packages.outputs.packages }}
 
     steps:
+      - uses: actions/checkout@v6
+
       - name: Define targets
         id: set-targets
         run: |
@@ -20,7 +22,7 @@ jobs:
       - name: Define packages
         id: set-packages
         run: |
-          echo 'packages=["red", "green", "blue"]' >> "$GITHUB_OUTPUT"
+          echo "packages={\"include\":$(cat pkginfo.json | tr -d '\n')}" >> "$GITHUB_OUTPUT"
 
   setup:
     runs-on: ubuntu-latest
@@ -48,6 +50,6 @@ jobs:
       - name: Make package
         env:
           target: ${{ matrix.targets }}
-          package: ${{ matrix.packages }}
+          package: ${{ matrix.packages.name }}
         run: |
           echo "Making $package for $target"
