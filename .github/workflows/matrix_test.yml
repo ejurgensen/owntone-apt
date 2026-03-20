@@ -125,7 +125,7 @@ jobs:
     steps:
       - name: Make pbuilder
         env:
-          target: ${{ matrix.targets }}
+          target: ${{ matrix.targets.image }}
         run: |
           echo "$target"
 
@@ -134,7 +134,7 @@ jobs:
     needs: [prepare, setup]
     strategy:
       matrix:
-        targets: ${{ fromJSON(needs.prepare.outputs.targets) }}
+        targets: ${{ fromJSON(needs.prepare.outputs.targets.image) }}
         packages: ${{ fromJSON(needs.prepare.outputs.packages) }}
 
     steps:
