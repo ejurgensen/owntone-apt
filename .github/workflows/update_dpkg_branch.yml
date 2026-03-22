@@ -2,6 +2,11 @@ name: Update Debian packages branch
 
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        description: Push new packages?
+        required: true
+        type: boolean
 
 jobs:
   update_dpkg:
@@ -33,3 +38,14 @@ jobs:
           find -name owntone_*.deb -type f -print0 | xargs -0 cp --update=none --target-directory=../owntone-server
           find -name airptpd_*.deb -type f -print0 | xargs -0 cp --update=none --target-directory=../airptpd
           ls -lR ..
+
+      # The GH action email is from https://github.com/orgs/community/discussions/26560
+      - name: Commit and push updated assets
+        if: ${{ github.event.inputs.release == 'true' }}
+        run: |
+          git add owntone-server/
+          git add airptpd/
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "[web] Rebuild web interface"
+          git push
