@@ -24,6 +24,7 @@ jobs:
           workflow_conclusion: success
           path: dl
           name: "debian"
+          name_is_regexp: true
 
       - name: Add incoming packages
         working-directory: dl
