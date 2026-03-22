@@ -27,9 +27,8 @@ jobs:
           name_is_regexp: true
 
       - name: Add incoming packages
-        working-directory: dl
         run: |
           ls -lR ..
-          find -name "owntone_*.deb" -type f -print0 | xargs -0 cp --update=none --target-directory=../owntone-server
-          find -name "airptpd_*.deb" -type f -print0 | xargs -0 cp --update=none --target-directory=../airptpd
+          find dl -name "owntone_*.deb" -type f -print0 | xargs -0 cp --update=none --target-directory=owntone-server
+          find dl -name "airptpd_*.deb" -type f -print0 | xargs -0 cp --update=none --target-directory=airptpd
           ls -lR ..
