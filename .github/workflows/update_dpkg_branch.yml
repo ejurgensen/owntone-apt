@@ -30,6 +30,6 @@ jobs:
         working-directory: dl
         run: |
           ls -lR ..
-          find "owntone_" -type f -print0 | grep ".deb" | xargs -0 cp --update=none --target-directory=../owntone-server
-          find "airptpd_" -type f -print0 | grep ".deb" | xargs -0 cp --update=none --target-directory=../airptpd
+          find -name "owntone_*.deb" -type f -print0 | xargs -0 cp --update=none --target-directory=../owntone-server
+          find -name "airptpd_*.deb" -type f -print0 | xargs -0 cp --update=none --target-directory=../airptpd
           ls -lR ..
