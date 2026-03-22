@@ -29,6 +29,6 @@ jobs:
       - name: Add incoming packages
         run: |
           ls -lR ..
-          find dl -name "owntone_*.deb" -type f -print0 | xargs -0 cp --update=none --target-directory=owntone-server
-          find dl -name "airptpd_*.deb" -type f -print0 | xargs -0 cp --update=none --target-directory=airptpd
+          find -name owntone_*.deb -type f -print0 | xargs -0 cp --update=none --target-directory=owntone-server
+          find -name airptpd_*.deb -type f -print0 | xargs -0 cp --update=none --target-directory=airptpd
           ls -lR ..
