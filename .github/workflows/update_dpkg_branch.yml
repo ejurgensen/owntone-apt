@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  update_repo:
+  update_dpkg:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -29,6 +29,6 @@ jobs:
       - name: Add incoming packages
         working-directory: dl
         run: |
-          find owntone* -type f -print0 | xargs -0 cp --update=none --target-directory=../owntone-server
-          find airptpd* -type f -print0 | xargs -0 cp --update=none --target-directory=../airptpd
+          find owntone_*.deb -type f -print0 | xargs -0 cp --update=none --target-directory=../owntone-server
+          find airptpd_*.deb -type f -print0 | xargs -0 cp --update=none --target-directory=../airptpd
           ls -lR ..
