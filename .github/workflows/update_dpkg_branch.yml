@@ -18,15 +18,18 @@ jobs:
           mkdir -p airptpd
 
       - name: Download packages
-        uses: actions/download-artifact@v8
+        uses: dawidd6/action-download-artifact@v3
         with:
-          path: dl
-          pattern: "debian"
+          workflow: create_dpkg_test2.yml
+          workflow_conclusion: success
+          path: dls
+          name: "debian"
+          name_is_regexp: true
 
       - name: Add incoming packages
         working-directory: dl
         run: |
           ls -lR ..
-          find owntone_*.deb -type f -print0 | xargs -0 cp --update=none --target-directory=../owntone-server
-          find airptpd_*.deb -type f -print0 | xargs -0 cp --update=none --target-directory=../airptpd
+          find "owntone_" -type f -print0 | grep ".deb" | xargs -0 cp --update=none --target-directory=../owntone-server
+          find "airptpd_" -type f -print0 | grep ".deb" | xargs -0 cp --update=none --target-directory=../airptpd
           ls -lR ..
