@@ -3,6 +3,12 @@ name: Update RPi repository
 on:
   workflow_dispatch:
     inputs:
+      owntone-server:
+        required: true
+        type: boolean
+      airptpd:
+        required: true
+        type: boolean
       release:
         description: Create release?
         required: true
@@ -23,6 +29,10 @@ jobs:
           mkdir -p dl/artifacts
           mkdir dist
 
+      - name: Mock dl repo
+        run: |
+          mkdir -p repo/rpi/var/incoming
+
       - name: Download packages
         uses: dawidd6/action-download-artifact@v21
         with:
@@ -34,4 +44,21 @@ jobs:
 
       - name: List artifacts
         run: |
-          ls -Rl dl/artifacts
+          ls -lR dl/artifacts
+
+      - name: Add owntone debs
+        if: ${{ github.event.inputs.owntone-server == 'true' }}
+        working-directory: dl/artifacts
+        run: |
+          find owntone* -type f -print0 | xargs -0 cp --update=none --target-directory=repo/rpi/var/incoming
+
+      - name: Add airptpd debs
+        if: ${{ github.event.inputs.airptpd == 'true' }}
+        working-directory: dl/artifacts
+        run: |
+          find airptpd* -type f -print0 | xargs -0 cp --update=none --target-directory=repo/rpi/var/incoming
+
+      - name: Process incoming packages
+        working-directory: repo/rpi
+        run: |
+          ls -l var/incoming
