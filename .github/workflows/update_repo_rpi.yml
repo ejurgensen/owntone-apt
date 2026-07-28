@@ -17,6 +17,7 @@ on:
 env:
   RELFILE: rpi_repo.tar.gz
   RELNOTESFILE: relnotes.txt
+  ARTIFACTSDIR: dl/artifacts
 
 jobs:
   update_repo:
@@ -26,7 +27,7 @@ jobs:
 
       - name: Prepare tmp directories
         run: |
-          mkdir -p dl/artifacts
+          mkdir -p $ARTIFACTSDIR
           mkdir dist
 
       - name: Mock dl repo
@@ -38,25 +39,23 @@ jobs:
         with:
           workflow: create_dpkg_test2.yml
           workflow_conclusion: success
-          path: dl/artifacts
+          path: $ARTIFACTSDIR
           name: "raspbian|raspberrypi|debian"
           name_is_regexp: true
 
       - name: List artifacts
         run: |
-          ls -lR dl/artifacts
+          ls -lR $ARTIFACTSDIR
 
       - name: Add owntone debs
         if: ${{ github.event.inputs.owntone-server == 'true' }}
-        working-directory: dl/artifacts
         run: |
-          find owntone* -type f -print0 | xargs -0 cp --update=none --target-directory=repo/rpi/var/incoming
+          find $ARTIFACTSDIR/owntone* -type f -print0 | xargs -0 cp --update=none --target-directory=repo/rpi/var/incoming
 
       - name: Add airptpd debs
         if: ${{ github.event.inputs.airptpd == 'true' }}
-        working-directory: dl/artifacts
         run: |
-          find airptpd* -type f -print0 | xargs -0 cp --update=none --target-directory=repo/rpi/var/incoming
+          find $ARTIFACTSDIR/airptpd* -type f -print0 | xargs -0 cp --update=none --target-directory=repo/rpi/var/incoming
 
       - name: Process incoming packages
         working-directory: repo/rpi
