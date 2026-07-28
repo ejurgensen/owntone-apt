@@ -20,24 +20,18 @@ jobs:
 
       - name: Prepare tmp directories
         run: |
-          mkdir dl
+          mkdir -p dl/artifacts
           mkdir dist
 
       - name: Download packages
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v4
         with:
           workflow: create_dpkg_test2.yml
           workflow_conclusion: success
-          path: dl
+          path: dl/artifacts
           name: "raspbian|raspberrypi|debian"
           name_is_regexp: true
-          merge_multiple: true
 
-      # Moves from e.g. dl/raspberrypi-bullseye-arm64 to repo/rpi/incoming
-      - name: Add incoming packages
-        working-directory: repo/rpi
-        env:
-          DPKGDIR: ../../dl
+      - name: List artifacts
         run: |
-          find $DPKGDIR -type f -print0 | xargs -0 cp -t var/incoming
-          ls -l var/incoming
+          ls -rl dl/artifacts
