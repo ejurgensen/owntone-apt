@@ -34,4 +34,4 @@ jobs:
 
       - name: List artifacts
         run: |
-          ls -rl dl/artifacts
+          ls -Rl dl/artifacts
