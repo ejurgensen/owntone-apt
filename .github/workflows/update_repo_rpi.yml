@@ -39,7 +39,7 @@ jobs:
         with:
           workflow: create_dpkg_test2.yml
           workflow_conclusion: success
-          path: $ARTIFACTSDIR
+          path: dl/artifacts
           name: "raspbian|raspberrypi|debian"
           name_is_regexp: true
 
