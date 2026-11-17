@@ -16,9 +16,9 @@ elif [ "$OS" == "raspbian" ]; then
     DEBOOTSTRAPOPTS=("${DEBOOTSTRAPOPTS[@]}" "--keyring=/usr/share/keyrings/raspbian-archive-keyring.gpg")
     PBUILDERSATISFYDEPENDSCMD="/usr/lib/pbuilder/pbuilder-satisfydepends-apt"
 elif [ "$OS" == "raspberrypi" ]; then
-    MIRRORSITE="http://deb.debian.org/debian/"
+    MIRRORSITE="http://archive.debian.org/debian/"
     COMPONENTS="main contrib non-free"
-    OTHERMIRROR="deb http://deb.debian.org/debian-security ${DIST}-security main contrib non-free|deb http://archive.raspberrypi.org/debian/ ${DIST} main"
+    OTHERMIRROR="deb http://archive.debian.org/debian-security bullseye-security main"
     APTKEYRINGS=("/usr/share/keyrings/raspberrypi-archive-keyring.gpg")
     DEBOOTSTRAPOPTS=("${DEBOOTSTRAPOPTS[@]}" "--keyring=/usr/share/keyrings/debian-archive-keyring.gpg")
     PBUILDERSATISFYDEPENDSCMD="/usr/lib/pbuilder/pbuilder-satisfydepends-apt"
